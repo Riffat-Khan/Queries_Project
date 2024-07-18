@@ -16,6 +16,7 @@ Patient.objects.filter(nurse__name='John Jacobs').values()
 Patient.objects.filter(name='Tyler Serrano').values('nurse__contact_number')
 
 # - Get the total number of patients admitted to the hospital.
+Hospital.objects.aggregate(Count('patient'))
 # - Find the patients who are not assigned to any nurse.
 Patient.objects.filter(nurse=False).values()   
 
@@ -32,7 +33,12 @@ Patient.objects.all().values().last()
 Patient.objects.annotate(num_patient = Count('doctor')).filter(num_patient__gte=6)
  
 # - Find the patients who have been admitted for more than a week.
+Patient.objects.filter(date__lte='2024-07-12').values()
+
 # - Get the number of patients assigned to each nurse.
+patient_nurse = Patient.objects.annotate(nurse_count=Count('nurse')).values('name', 'nurse_count')
+for patient in patient_nurse:
+  print(f'patient: {patient['name']},    nurses{patient['nurse_count']}')
 # - Retrieve the names of patients who have a specific doctor.
 Patient.objects.filter(doctor__name='Jeremy Richardson').values('name')
 
@@ -67,6 +73,11 @@ MedicalRecord.objects.all().count()
 Patient.objects.filter(nurse__contact_number='7276154573').values("name") 
 
 # - Find the patients who are treated by more than one doctor.
+doctor_more = Patient.objects.annotate(doctor_count=Count('doctor')).values('name', 'doctor_count')
+for patient in doctor_more:
+  if patient['doctor_count'] > 1:
+    print(f'patient: {patient['name']}')
+    
 # - Get the names of doctors who have treated patients with a specific prescription.
 MedicalRecord.objects.filter(prescription='Property clear someone state participant hundred who recently worker trial history prove.').values('patient__doctor__name')
 
